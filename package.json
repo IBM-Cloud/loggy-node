@@ -1,0 +1,28 @@
+{
+  "name":               "loggy-node",
+  "version":            "0.1.0",
+  "description":        "sample node.js server that does a lot of logging",
+  "author":             "pmuellr",
+  "homepage":           "https://github.com/IBM-Bluemix/loggy-node",
+  "license":            "Apache-2.0",
+  "repository": {
+    "type":             "git",
+    "url" :             "https://github.com/IBM-Bluemix/loggy-node.git"
+  },
+
+  "main":               "server",
+  "scripts": {
+    "cake":             "cake",
+    "watch":            "cake watch",
+    "serve":            "cake serve"
+  },
+  "dependencies": {
+    "cfenv":            "1.0.x",
+    "hapi":             "8.2.x"
+  },
+  "devDependencies": {
+    "cakex":            "0.1.x",
+    "coffee-script":    "1.9.x"
+  }
+
+}

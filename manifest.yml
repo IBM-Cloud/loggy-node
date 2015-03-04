@@ -1,0 +1,7 @@
+---
+
+applications:
+- name:      loggy-node
+  host:      loggy-node-pjm
+  memory:    128M
+  command:   node server

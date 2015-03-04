@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>loggy-node</title>
+  <style>
+    body {
+      font-size: 200%;
+      margin:    1em;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<h1>loggy</h1>
+
+<p>loggy is a test application for Cloud Foundry that demonstrates how
+to deal with logging in node.js.
+
+<p>Some things you can do to the server:
+
+<ul>
+  <li><a href="#" id="api-memHawg"> consume all memory</a>
+  <li><a href="#" id="api-exit0">   have the process exit with status 0</a>
+  <li><a href="#" id="api-exit1">   have the process exit with status 1</a>
+  <li><a href="#" id="api-error">   throw an uncaught exception</a>
+</ul>
+
+<script>
+//-------------------------------------
+callOnClick("memHawg")
+callOnClick("exit0")
+callOnClick("exit1")
+callOnClick("error")
+
+//-------------------------------------
+function callOnClick(api) {
+  document.getElementById("api-" + api).onclick = function() {
+    call(api)
+  }
+}
+
+//-------------------------------------
+function call(api) {
+  var xhr = new XMLHttpRequest()
+  xhr.open("get", "/api/" + api, true)
+  xhr.send()
+}
+</script>
+
+</body>
+</html>
