@@ -71,7 +71,7 @@ A couple additional notes on the subject of `cf logs`:
 
     <noscript>
       <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1#file-cf-log-cut">
-        see this gist
+        see this gist - cf-log-cut
       </a>
     </noscript>
     <script
@@ -85,7 +85,7 @@ A couple additional notes on the subject of `cf logs`:
 
     <noscript>
       <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1#file-cf-log-no-rtr">
-        see this gist
+        see this gist - cf-log-no-rtr
       </a>
     </noscript>
     <script

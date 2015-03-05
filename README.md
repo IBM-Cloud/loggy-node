@@ -1,6 +1,12 @@
 loggy - sample node.js server that does a lot of logging
 ================================================================================
 
+This is a sample application showing how to handle logging on Cloud Foundry
+with node.js.  There's an article available, discussing the application,
+here:
+
+* <https://github.com/IBM-Bluemix/loggy-node/blob/master/article.md>
+
 
 
 hacking
