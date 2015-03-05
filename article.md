@@ -70,7 +70,7 @@ A couple additional notes on the subject of `cf logs`:
     variables:
 
     <noscript>
-      <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-cut">
+      <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1#file-cf-log-cut">
         see this gist
       </a>
     </noscript>
@@ -84,7 +84,7 @@ A couple additional notes on the subject of `cf logs`:
     You can elide them with `grep`, as this script does:
 
     <noscript>
-      <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-no-rtr">
+      <a href="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1#file-cf-log-no-rtr">
         see this gist
       </a>
     </noscript>
