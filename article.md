@@ -69,6 +69,11 @@ A couple additional notes on the subject of `cf logs`:
     that lets you do some customization yourself, with "fields" named as shell
     variables:
 
+    <noscript>
+      <a href="src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-cut">
+        see this gist
+      </a>
+    </noscript>
     <script
       src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-cut">
     </script>
@@ -78,6 +83,11 @@ A couple additional notes on the subject of `cf logs`:
     useful, and ... THEY ARE VERY LOOOOOOOONG.
     You can elide them with `grep`, as this script does:
 
+    <noscript>
+      <a href="src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-no-rtr">
+        see this gist
+      </a>
+    </noscript>
     <script
       src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-no-rtr">
     </script>
