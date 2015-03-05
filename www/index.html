@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>loggy-node</title>
+  <link rel="icon" href="http://cloudfoundry.org/images/favicon.ico">
   <style>
     body {
       font-size: 200%;
@@ -16,12 +17,12 @@
 
 <body>
 
-<h1>loggy</h1>
+<h1>loggy-node</h1>
 
-<p>loggy is a test application for Cloud Foundry that demonstrates how
+<p>loggy-node is a test application for Cloud Foundry that demonstrates how
 to deal with logging in node.js.
 
-<p>Some things you can do to the server:
+<p>Some things you can do to the server, all of which will kill it:
 
 <ul>
   <li><a href="#" id="api-memHawg"> consume all memory</a>
@@ -29,6 +30,24 @@ to deal with logging in node.js.
   <li><a href="#" id="api-exit1">   have the process exit with status 1</a>
   <li><a href="#" id="api-error">   throw an uncaught exception</a>
 </ul>
+
+<p>Don't worry! Cloud Foundry will restart the app, after it dies a horrible
+death.
+
+<p>The code for this app is available at
+<a href="https://github.com/IBM-Bluemix/loggy-node">https://github.com/IBM-Bluemix/loggy-node</a>.
+The <a href="https://github.com/IBM-Bluemix/loggy-node/blob/master/article.md">article</a>
+in the project contains more information about using logging in your Cloud
+Foundry applications.
+
+<p>You can install your own copy of this app on Bluemix, by clicking the
+Deploy to Bluemix button, below.
+
+<p><a href="https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/loggy-node" target="_blank">
+<img src="http://bluemix.net/deploy/button.png" alt="Bluemix button">
+</a>
+
+<!-- ======================================================================= -->
 
 <script>
 //-------------------------------------
