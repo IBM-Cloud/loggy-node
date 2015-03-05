@@ -1,0 +1,348 @@
+<style>
+body {
+  margin-left:        5em;
+  margin-right:       5em;
+  font-size:          120%;
+  line-height:        1.4;
+  zz-min-width:          740px;
+  zz-max-width:          740px;
+}
+
+blockquote {
+  font-weight:        bold;
+  font-style:         italic;
+  border-left:        thin solid #000;
+  padding-left:       1em;
+}}
+
+p-zzz {
+  font-size:          120%;
+  line-height:        1.4;
+}
+
+a, a:visited {
+  color:              #2187bb;
+}
+
+code {
+  zz-font-size:          18px;
+  zz-line-height:        24px;
+}
+
+pre {
+  margin-left:        1em;
+  overflow:           auto;
+  background-color:   #EBECE4;
+  padding:            0.5em;
+  border:             solid thin #CCF;
+  font-size:          18px;
+  line-height:        24px;
+}
+
+h1 {
+  color:              rgb(33, 135, 187);
+  font-family:        Consolas;
+  font-size:          42px;
+  font-weight:        bold;
+}
+</style>
+
+<h1>add more logging!</h1>
+<!-- add more logging! -->
+
+<blockquote>
+  <p>The most effective debugging tool is still careful thought,
+coupled with judiciously placed print statements.</p>
+
+<p>-- Brian Kernighan, "Unix for Beginners" (1979)</p>
+</blockquote>
+
+<p>It's very often the case that when a Bluemix app doesn't work the way you
+expect it to, you don't have any idea <strong>WHY</strong> it doesn't work the way you
+expect it to.  How can you diagnose this?  With <strong>logging</strong>.</p>
+
+<p>This article will discuss how to access your logs in Bluemix, discuss some
+general logging techniques, and then go in depth on some
+logging frameworks/libraries specific to node.js.  If you aren't using node.js,
+have no fear that your language runtime provides multiple, elaborate logging
+frameworks and libraries - they all do - find them and use them!</p>
+
+<p>The section on node.js logging refers to a GitHub repository
+<a href="https://github.com/IBM-Bluemix/loggy-node">IBM-Bluemix/loggy-node</a>, which contains an application you can deploy on
+Bluemix that demonstrates some logging techniques.  You can clone that
+repo and deploy on Bluemix
+by clicking the Deploy to Bluemix button, below.</p>
+
+<p><p><center>
+<a href="https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/loggy-node" target="blank">
+<img src="http://bluemix.net/deploy/button.png" alt="Bluemix button">
+</a>
+</center></p>
+
+<h2>accessing your logs using <code>cf logs</code></h2>
+
+<p>For more information on the basics of accessing your logs with <code>cf logs</code>, refer
+to my colleague Ryan Baxter's great article on
+"<a href="https://developer.ibm.com/bluemix/2014/10/29/accessing-application-logs-bluemix/">Accessing Application Logs In Bluemix</a>".  No need to repeat
+that info here.</p>
+
+<p>A couple additional notes on the subject of <code>cf logs</code>:</p>
+
+<ul>
+<li><p>Make sure you're running the latest version of the <code>cf</code> command line tool;
+it is updated fairly frequently.  And the logging componentry in Cloud Foundry
+(and thus Bluemix), and in the <code>cf</code> tool, has also been updated a bit over
+the last few months.  </p>
+
+<p>The latest releases can always be found at
+<a href="https://github.com/cloudfoundry/cli/releases">https://github.com/cloudfoundry/cli/releases</a>.  You can check which version
+you currently have installed, by running <code>cf --version</code></p></li>
+<li><p>The general pattern for lines from <code>cf logs</code> is as follows, with a column number
+legend above it.</p>
+
+<pre><code>         1         2         3         4         5
+12345678901234567890123456789012345678901234567890
+-----------------------------------------------------------
+2015-03-05T09:20:00.17-0500 [App/0]      OUT &lt;message here&gt;
+</code></pre>
+
+<p>You can partition the message into 4 pieces - timestamp, component that
+generated the message, stream the message was written to, and the
+message itself.</p>
+
+<p>In the message above, the component that generated the message was your
+application (eg, <code>[App/&lt;instance #&gt;]</code>), and the message was written to
+stdout.</p>
+
+<p>There's a lot of stuff there; you might want to cut some of it out.  You can
+do that by filtering the output with a unix <code>cut</code> command.  Here's a script
+that lets you do some customization yourself, with "fields" named as shell
+variables:</p>
+
+<script
+  src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-cut">
+</script>
+
+<p>You'll also end up seeing <code>[RTR/nnn]</code> messages in your logs, which are basically
+the same kind of thing you'd see from a web server log.  Often these aren't
+useful, and ... THEY ARE VERY LOOOOOOOONG.
+You can elide them with <code>grep</code>, as this script does:</p>
+
+<script
+  src="https://gist.github.com/pmuellr/5e5cc10c19b71d9599a1.js?file=cf-log-no-rtr">
+</script>
+
+<p>Putting that all together, you might want to run <code>cf logs</code> using this command
+instead:</p>
+
+<pre><code>cf logs [app-name] | cf-log-no-rtr | cf-log-cut
+</code></pre>
+
+<p>With these techniques, you can go from this:</p>
+
+<pre><code>2015-03-05T14:42:54.46-0500 [RTR/0]      OUT [host].mybluemix.net - [05/03/2015:19:42:54 +0000] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.74 Safari/537.36" 75.126.70.46:15114 x_forwarded_for:"-" vcap_request_id:9a0cf781-ca3b-43c1-6f36-b6e8f4414984 response_time:0.008147682 app_id:[app-id]
+2015-03-05T14:43:14.60-0500 [API/8]      OUT Updated app with guid [app-id] ({"state"=&gt;"STARTED"})
+2015-03-05T14:43:14.62-0500 [DEA/14]     OUT Starting app instance (index 0) with guid [app-id]
+2015-03-05T14:43:14.84-0500 [DEA/126]    OUT Stopping app instance (index 0) with guid [app-id]
+2015-03-05T14:43:14.84-0500 [DEA/126]    OUT Stopped app instance (index 0) with guid [app-id]
+2015-03-05T14:43:32.77-0500 [App/0]      OUT loggy:init: enabling alternate stack trace
+2015-03-05T14:43:32.79-0500 [App/0]      OUT loggy:init: setting up routes for APIs
+2015-03-05T14:43:32.79-0500 [App/0]      OUT loggy:server: starting on: https://[host].mybluemix.net
+2015-03-05T14:43:32.80-0500 [App/0]      OUT loggy:server: started  on: https://[host].mybluemix.net
+2015-03-05T14:44:10.49-0500 [RTR/0]      OUT [host].mybluemix.net - [05/03/2015:19:44:10 +0000] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.74 Safari/537.36" 75.126.70.42:54721 x_forwarded_for:"-" vcap_request_id:44c7efdf-9a88-451c-4308-cd6bb03af666 response_time:0.005201182 app_id:[app-id]
+</code></pre>
+
+<p>to this:</p>
+
+<pre><code>14:43:14 Updated app with guid [app-id] ({"state"=&gt;"STARTED"})
+14:43:14 Starting app instance (index 0) with guid [app-id]
+14:43:14 Stopping app instance (index 0) with guid [app-id]
+14:43:14 Stopped app instance (index 0) with guid [app-id]
+14:43:32 loggy:init: enabling alternate stack trace
+14:43:32 loggy:init: setting up routes for APIs
+14:43:32 loggy:server: starting on: https://[host].mybluemix.net
+14:43:32 loggy:server: started  on: https://[host].mybluemix.net
+</code></pre></li>
+</ul>
+
+<h2>accessing your logs using a third party service</h2>
+
+<p>Again, Ryan Baxter's great article on
+"<a href="https://developer.ibm.com/bluemix/2014/10/29/accessing-application-logs-bluemix/">Accessing Application Logs In Bluemix</a>" provides all the
+info you'll need to hook up a 3rd party logging service to collect your app's
+logs.</p>
+
+<h2>general logging techniques</h2>
+
+<ul>
+<li><p><strong>find a logging framework / library that works for you</strong></p>
+
+<p>There are many for all the programming runtime environments out there.  Google
+"logging" and your language name, then <strong>START READING AND EXPERIMENTING</strong>.
+You can probably find something off-the-shelf that suits your application,
+but if not, you can always write a simple one yourself.  Just always seems that
+those "simple" ones become complex, at which point you should have used some
+nice off-the-shelf component.</p></li>
+<li><p><strong>errors often occur during initialization</strong></p>
+
+<p>So, add lots of logging during initialization.  Initialization only happens
+once in your app - well, once per each app instance started.  But, that's
+not often, so <strong>GO CRAZY</strong>.</p></li>
+<li><p><strong>log conditions at process termination, if possible</strong></p>
+
+<p>Many programming language runtimes provide a way to get a "hook" to process
+termination, so you can clean up after yourself, log some messages, etc.
+<strong>TAKE ADVANTAGE OF THIS</strong>.  Below, I'll show using the hooks in node.js to
+adding some logging when your process ends (usually).</p></li>
+</ul>
+
+<h2>logging frameworks/libraries specific to node.js</h2>
+
+<ul>
+<li><p><strong><code>console.log()</code> &amp; family</strong></p>
+
+<p>The <code>printf()</code> of the node.js world.  But there's more!  Check out
+the <a href="https://iojs.org/api/console.html#console_console">console docs</a> for all the capabilities.</p></li>
+<li><p><strong>the <code>debug</code> package</strong></p>
+
+<p>The <a href="https://www.npmjs.com/package/debug">debug package</a> provides some really nice looking output, when
+you run it from a terminal.  It's also pretty easy to use, and allows you
+to determine which debug loggers should print via an environment variable.</p>
+
+<p>Unfortunately, it doesn't work so well when not attached to a terminal, like
+the way your app runs on Cloud Foundry.  It prints out ANOTHER time-stamp
+in the output.  So I don't use it.  However, I liked the interface so much
+I copied it into my
+<a href="https://github.com/IBM-Bluemix/loggy-node/blob/master/lib/debug.js">super-simple debug logger</a>
+included with the sample application.</p></li>
+<li><p><strong>the <code>winston</code> package</strong></p>
+
+<p>The <a href="https://www.npmjs.com/package/winston">winston package</a> is sort of the Log4J of the JavaScript world; if
+you're coming from Java, and have used one of the standard logging libraries,
+you will feel right at home with winston.</p></li>
+<li><p><strong>the <code>bunyan</code> package</strong></p>
+
+<p>The <a href="https://www.npmjs.com/package/bunyan">bunyan package</a> provides an interesting twist to the logging world;
+rather than just print <em>messages</em>, it prints <em>objects</em>, as JSON.  This of
+course helps solve the age-old question of "<em>how do I provide richer, more
+precise data in my log messages</em>".  The price you pay is that you will
+likely need to use a filter to provide something readable to humans.  A
+command-line filter is provided with the bunyan package.</p></li>
+<li><p><strong>thousands of others packages ...</strong></p>
+
+<p><a href="https://www.npmjs.com/search?q=log">6508 packages</a>, to be precise (at the time of this writing).  You might
+like the search results better at <a href="http://node-modules.com/search?q=log">node-modules.com</a> though.</p></li>
+</ul>
+
+<h2>sample app showing off some logging</h2>
+
+<p>As mentioned above, several times, I put together a little sample application
+that does a lot of logging, available at the GitHub repository
+<a href="https://github.com/IBM-Bluemix/loggy-node">IBM-Bluemix/loggy-node</a>.  The application presents a web page with
+buttons on it that will end up killing the server.  This is so you can see
+what actually happens when your server dies.</p>
+
+<p>Let's walk through some of the bits:</p>
+
+<ul>
+<li><p><strong><a href="https://github.com/IBM-Bluemix/loggy-node/blob/master/server.js"><code>server.js</code></a></strong></p>
+
+<p>This is the main program of the application.  It's heavily commented, so
+there's no need to go into details here, but here are some interesting
+points:</p>
+
+<ul>
+<li>Make it easy to log a message, eg, the <code>DEBUGinit()</code> et al functions.</li>
+<li>Do a lot of logging during initialization.</li>
+<li>Set up global exit and error handlers that log messages.</li>
+<li>Log a message right <strong>BEFORE</strong> your server starts, and right <strong>AFTER</strong>
+your server starts.  In those messages, print at least the port your
+server is bound to, or the complete URL if available.</li>
+</ul></li>
+<li><p><strong><a href="https://github.com/IBM-Bluemix/loggy-node/blob/master/lib/altStackTrace.js"><code>lib/altStackTrace.js</code></a></strong></p>
+
+<p>The V8 JavaScript engine has a really cool feature that allows you to
+generate your own formatted stack trace.  See the
+<a href="https://code.google.com/p/v8-wiki/wiki/JavaScriptStackTraceApi">JavaScriptStackTraceApi wiki page</a> for more
+information.  This is just eye candy, in this case, but you may find some
+other interesting use for it.</p></li>
+<li><p><strong><a href="https://github.com/IBM-Bluemix/loggy-node/blob/master/lib/debug.js"><code>lib/debug.js</code></a></strong></p>
+
+<p>This is my super-simple module that acts kind of like the npm <code>debug</code> package.
+Couldn't be simpler.  In a separate module, because you know you'll be
+using this in more than one module.</p></li>
+</ul>
+
+<h2>what the sample app logs</h2>
+
+<p>Last bit is to show you what it logs, when you press the buttons in the app.
+I'll show the cut/non-RTR log as demonstrated previously, with the time
+also elided.</p>
+
+<ul>
+<li><p><strong>button "have the process exit with status 0"</strong></p>
+
+<pre><code>loggy:init: application starting
+loggy:init: enabling alternate stack trace
+loggy:init: adding exit handler
+loggy:init: adding uncaught exception handler
+loggy:init: getting application environment
+loggy:init: creating Hapi server
+loggy:init: setting host/port for server
+loggy:init: setting up Hapi error handler to debug log and exit
+loggy:init: setting up route for static files
+loggy:init: setting up routes for APIs
+loggy:server: starting on: https://loggy-node-pjm.mybluemix.net
+loggy:server: started  on: https://loggy-node-pjm.mybluemix.net
+loggy:exit: code: 0
+App instance exited with guid ... payload: {...}
+</code></pre>
+
+<p>Note that the <code>payload</code> bit in the last message often contains juicy bits
+of information.  In this case, there wasn't much, besides
+<code>exit_status"=&gt;0</code>, which is what we expected.</p></li>
+<li><p><strong>button "have the process exit with status 1"</strong></p>
+
+<p>Same as above, only this time, the <code>payload</code> bit in the last message
+contains <code>exit_status"=&gt;1</code>, which, again, is what we expected.</p></li>
+<li><p><strong>button "throw an uncaught exception"</strong></p>
+
+<p>This time there are some more interesting messages:</p>
+
+<pre><code>loggy:error: exception: Error: Uncaught error: expected
+  server.js:145:                                        apiError()
+  node_modules/hapi/lib/handler.js:94:                  internals.handler()
+  node_modules/hapi/lib/handler.js:28:                  &lt;anon&gt;()
+  node_modules/hapi/lib/protect.js:56:                  internals.Protect.run()
+  node_modules/hapi/lib/handler.js:22:                  exports.execute()
+  node_modules/hapi/lib/request.js:321:                 &lt;anon&gt;()
+  node_modules/hapi/node_modules/items/lib/index.js:35: iterate()
+  node_modules/hapi/node_modules/items/lib/index.js:27: done()
+  node_modules/hapi/node_modules/hoek/lib/index.js:781: &lt;anon&gt;()
+  node.js:376:                                          tickDomainCallback()
+loggy:exit: code: 1
+</code></pre>
+
+<p>Look at that <strong>GORGEOUS</strong> stack trace, courtesy the <code>altStackTrace</code> module!</p>
+
+<p>The payload still has <code>exit_status"=&gt;1</code>, because our uncaught exception
+handler calls <code>process.exit(1)</code>.</p></li>
+<li><p><strong>button "consume all memory"</strong></p>
+
+<p>In this case, there won't be <strong>ANY</strong> of our logging messages, because there's
+no way to "hook" out of memory conditions in node.js.  Be wary of any
+programming language runtime that offers such a thing.  How much work can
+you do in an "out of memory" handler if ... you have no memory.  Yeah, not
+much.</p>
+
+<p>What you will see is the <code>App instance exited</code> message, with something new
+in the <code>payload</code>: <code>"exit_description"=&gt;"out of memory"</code>.  Neat!  Cloud
+Foundry was able to figure out we were out of memory, and told us via the
+exit message.</p>
+
+<p>I should note that while testing the "consume all memory" button, I didn't
+<strong>ALWAYS</strong> see the <code>out of memory</code> description.  Most of the time, but not
+all the time.  When you run out of memory, things get weird.</p></li>
+</ul>
+
+<!-- ======================================================================= -->

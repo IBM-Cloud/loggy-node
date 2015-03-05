@@ -1,4 +1,4 @@
-loggy - sample node.js that does logging
+loggy - sample node.js server that does a lot of logging
 ================================================================================
 
 

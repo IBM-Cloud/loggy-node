@@ -21,6 +21,7 @@
     "hapi":             "8.2.x"
   },
   "devDependencies": {
+    "bower":            "1.3.x",
     "cakex":            "0.1.x",
     "coffee-script":    "1.9.x"
   }

@@ -12,6 +12,7 @@ mkdir "-p", "tmp"
 
 #-------------------------------------------------------------------------------
 taskWatch = ->
+  buildArticle()
   watchIter()
 
   watch
@@ -31,91 +32,51 @@ watchIter = (file) ->
     buildArticle()
     return
 
+  copyBowerFiles "www/bower"
+
   taskServe()
 
 #-------------------------------------------------------------------------------
 taskServe = ->
-  log "restarting server at #{new Date()}"
+  log "restarting server"
 
   process.env.DEBUG = "loggy:*"
   daemon.start "server", "node", ["server"]
 
 #-------------------------------------------------------------------------------
 buildArticle = ->
-  file    = "article.md"
-  content = cat file
-  match   = content.match /<!--(.*?)-->/
-  title   = "no title specified"
-  title   = match[1].trim() if match?
-
-  base = splitExt file
-
-  {code, output} = exec "Markdown.pl #{file}", silent: true
-  logError "status Markdown.pl: #{code}" if code isnt 0
-
-  oFile = "tmp/#{base}.html"
-  dFile = "tmp/#{base}.dev.html"
-
-  output.to oFile
-  log "generated #{oFile}"
-
-  htmlPrefix = htmlPrefixBase.replace("%title%", title)
-
-  "#{htmlPrefix}\n#{output}".to dFile
-  log "generated #{dFile}"
+  coffee "article-build.coffee"
 
 #-------------------------------------------------------------------------------
-splitExt = (file) ->
-    ext = path.extname file
-    return file.substr 0, file.length-ext.length
+copyBowerFiles = (dir) ->
+  bowerConfig = require "./bower-config"
+
+  log "installing files from bower"
+  
+  cleanDir dir
+
+  for name, {version, files} of bowerConfig
+    unless test "-d", "bower_components/#{name}"
+      bower "install #{name}##{version}"
+      log ""
+
+  for name, {version, files} of bowerConfig
+    for src, dst of files
+      src = "bower_components/#{name}/#{src}"
+
+      if dst is "."
+        dst = "#{dir}/#{name}"
+      else
+        dst = "#{dir}/#{name}/#{dst}"
+
+      mkdir "-p", dst
+
+      cp "-R", src, dst
 
 #-------------------------------------------------------------------------------
-htmlPrefixBase = """
-    <style>
-    body {
-        margin-left:        5em;
-        margin-right:       5em;
-        font-size:          120%;
-        line-height:        1.4;
-        zz-min-width:          740px;
-        zz-max-width:          740px;
-    }
-
-    p-zzz {
-        font-size:          120%;
-        line-height:        1.4;
-    }
-
-    a, a:visited {
-        color:              #2187bb;
-    }
-
-    code {
-        zz-font-size:          18px;
-        zz-line-height:        24px;
-    }
-
-    pre {
-        margin-left:        1em;
-        overflow:           auto;
-        background-color:   #EBECE4;
-        padding:            0.5em;
-        border:             solid thin #CCF;
-        font-size:          18px;
-        line-height:        24px;
-    }
-
-    h1 {
-        color:              rgb(33, 135, 187);
-        font-family:        Consolas;
-        font-size:          42px;
-        font-weight:        bold;
-    }
-    </style>
-
-    <h1>%title%</h1>
-"""
-
+cleanDir = (dir) ->
+  mkdir "-p", dir
+  rm "-rf", "#{dir}/*"
 
 #-------------------------------------------------------------------------------
 # Licensed under the Apache License, Version 2.0 (the "License");

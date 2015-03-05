@@ -1,18 +1,23 @@
 // Licensed under the Apache License. See footer for details.
 
-//------------------------------------------------------------------------------
-// The `createDebug` function takes a string, and returns a function.  The
-// function returned will print the string passed into `createDebug`, and the
-// the string passed to the function returned.  Similar interface as the
-// npm `debug` package.
-//------------------------------------------------------------------------------
-exports.createDebug = createDebug
+//-------------------------------------
+callOnClick("memHawg")
+callOnClick("exit0")
+callOnClick("exit1")
+callOnClick("error")
 
-//------------------------------------------------------------------------------
-function createDebug(name) {
-  return function(message) {
-    console.log(name + ": " + message)
+//-------------------------------------
+function callOnClick(api) {
+  document.getElementById("api-" + api).onclick = function() {
+    call(api)
   }
+}
+
+//-------------------------------------
+function call(api) {
+  var xhr = new XMLHttpRequest()
+  xhr.open("get", "/api/" + api, true)
+  xhr.send()
 }
 
 //------------------------------------------------------------------------------
