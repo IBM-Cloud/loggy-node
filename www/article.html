@@ -312,11 +312,11 @@ App instance exited with guid ... payload: {...}
 
 <p>Note that the <code>payload</code> bit in the last message often contains juicy bits
 of information.  In this case, there wasn't much, besides
-<code>exit_status"=&gt;0</code>, which is what we expected.</p></li>
+<code>"exit_status"=&gt;0</code>, which is what we expected.</p></li>
 <li><p><strong>button "have the process exit with status 1"</strong></p>
 
 <p>Same as above, only this time, the <code>payload</code> bit in the last message
-contains <code>exit_status"=&gt;1</code>, which, again, is what we expected.</p></li>
+contains <code>"exit_status"=&gt;1</code>, which, again, is what we expected.</p></li>
 <li><p><strong>button "throw an uncaught exception"</strong></p>
 
 <p>This time there are some more interesting messages:</p>
@@ -337,7 +337,7 @@ loggy:exit: code: 1
 
 <p>Look at that <strong>GORGEOUS</strong> stack trace, courtesy the <code>altStackTrace</code> module!</p>
 
-<p>The payload still has <code>exit_status"=&gt;1</code>, because our uncaught exception
+<p>The payload still has <code>"exit_status"=&gt;1</code>, because our uncaught exception
 handler calls <code>process.exit(1)</code>.</p></li>
 <li><p><strong>button "consume all memory"</strong></p>
 

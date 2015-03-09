@@ -270,13 +270,13 @@ also elided.
 
     Note that the `payload` bit in the last message often contains juicy bits
     of information.  In this case, there wasn't much, besides
-    `exit_status"=>0`, which is what we expected.
+    `"exit_status"=>0`, which is what we expected.
 
 
 *   **button "have the process exit with status 1"**
 
     Same as above, only this time, the `payload` bit in the last message
-    contains `exit_status"=>1`, which, again, is what we expected.
+    contains `"exit_status"=>1`, which, again, is what we expected.
 
 *   **button "throw an uncaught exception"**
 
@@ -297,7 +297,7 @@ also elided.
 
     Look at that **GORGEOUS** stack trace, courtesy the `altStackTrace` module!
 
-    The payload still has `exit_status"=>1`, because our uncaught exception
+    The payload still has `"exit_status"=>1`, because our uncaught exception
     handler calls `process.exit(1)`.
 
 *   **button "consume all memory"**
